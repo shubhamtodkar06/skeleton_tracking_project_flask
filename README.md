@@ -1,2 +1,2 @@
 # skeleton_tracking_project_flask
-A software where a human skeleton on the screen imitates with animation of the person in the live webcam.
+A software where a human skeleton on the screen imitates with animation of the person in the live webcam.If the person moves, the skeleton moves, if the person sits the skeleton sits and if the person does any facial or hand actions it mimics the same. It is animated and funny. It has flask interface. A software where a human skeleton on the screen imitates with animation of the person in the live webcam.If the person moves, the skeleton moves, if the person sits the skeleton sits and if the person does any facial or hand actions it mimics the same. It is animated and funny. It has flask interface. 
