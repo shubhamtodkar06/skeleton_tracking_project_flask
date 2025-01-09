@@ -3,11 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Skeleton Tracker</title>
+    <title>Skeleton Mimic</title>
+    <style>
+        body {
+            text-align: center;
+        }
+        #webcam {
+            display: block;
+            margin: 0 auto;
+            border: 1px solid #000;
+        }
+    </style>
 </head>
-<body style="text-align: center; background-color: #333; color: white;">
-    <h1>Real Skeleton Tracker</h1>
-    <p>Watch the human skeleton mimic your movements!</p>
-    <img src="{{ url_for('video_feed') }}" alt="Live Feed" style="border: 2px solid white; width: 80%; height: auto;">
+<body>
+    <h1>Skeleton Mimic</h1>
+    <video id="webcam" width="640" height="480" autoplay></video>
+    <canvas id="skeletonCanvas" width="640" height="480"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/mediapipe"></script>
+    <script>
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('skeletonCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Access the webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+            video.srcObject = stream;
+        })
+        .catch(function (error) {
+            console.log("Error accessing webcam: ", error);
+        });
+
+        // Setup MediaPipe Pose
+        const pose = new window.mediapipe.pose.Pose({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/mediapipe@latest/pose/${file}`,
+        });
+
+        pose.onResults(onPoseResults);
+
+        const camera = new window.cv.VideoCapture(video);
+
+        // Process frames for pose detection
+        function detectPose() {
+            camera.read();
+            pose.send({ image: camera });
+            requestAnimationFrame(detectPose);
+        }
+
+        function onPoseResults(results) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const landmarks = results.poseLandmarks;
+            const connections = [
+                [0, 1], [1, 2], [2, 3], [3, 4], [5, 6], [6, 7], [7, 8],
+                [9, 10], [11, 12], [13, 14], [15, 16], [17, 18], [19, 20]
+            ];
+
+            // Draw connections between landmarks
+            connections.forEach(([startIdx, endIdx]) => {
+                const start = landmarks[startIdx];
+                const end = landmarks[endIdx];
+                ctx.beginPath();
+                ctx.moveTo(start.x * canvas.width, start.y * canvas.height);
+                ctx.lineTo(end.x * canvas.width, end.y * canvas.height);
+                ctx.strokeStyle = 'blue';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+
+            // Draw landmarks
+            landmarks.forEach(landmark => {
+                ctx.beginPath();
+                ctx.arc(landmark.x * canvas.width, landmark.y * canvas.height, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+            });
+        }
+
+        // Start the pose detection
+        detectPose();
+    </script>
 </body>
 </html>
